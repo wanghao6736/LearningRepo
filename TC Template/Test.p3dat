@@ -1,0 +1,59 @@
+; ===========================================================================================================
+; FILE: Test.p3dat
+; INFO: Conduct shear tests. 
+; STEP: 1.save file setting
+;       2.tests setting                                                                  wanghao 2022.04.11
+; ===========================================================================================================
+wall servo activate false
+ball   attribute displacement multiply 0 velocity multiply 0
+clump  attribute displacement multiply 0 velocity multiply 0
+rblock attribute displacement multiply 0 velocity multiply 0
+
+def wlz
+    wlz = wall.pos.z(wt) - wall.pos.z(wb) - pH
+end
+
+def monitor
+    wezz = (wlz0 - wlz) / wlz0 * 100
+    wszz = 0.5 * (wall.force.contact.z(wt) - wall.force.contact.z(wb)) / (math.pi * pR * pR)
+    devi = wszz - g_s
+end
+
+def load
+    wall.vel.z(wt) = -load_rate * wlz0
+    wall.vel.z(wb) =  load_rate * wlz0
+end
+
+def test_halt
+    if wezz > halt_wezz then
+        test_halt = 1
+    endif
+end
+
+def export
+    if wezz >= log then
+        command
+            plot 'Geometry' export bitmap filename [save_dir + 'wezz' + string(log) + '.png']
+            model save [save_dir + 'wezz' + string(log) + '.sav']
+        endcommand
+        log += 0.5
+    endif
+end
+
+[wlz0 = wlz]
+@load
+
+fish callback remove @update_mem_force -1
+fish callback add @update_mem_force -1 interval 1000
+fish callback add @export -1 interval 1000
+fish callback add @monitor -1
+
+fish history @wezz
+fish history @wszz
+fish history @devi
+
+model solve fishhalt @test_halt
+plot 'Result' export csv filename [save_dir + test_name + '.csv']
+model save [save_dir + 'result.sav']
+; ===========================================================================================================
+; EOF: Test.p3dat

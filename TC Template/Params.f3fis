@@ -1,0 +1,73 @@
+; ===========================================================================================================
+; FILE: Params.f3fis
+; INFO: Set parameters used in this model.
+; NOTE: 
+; * all parameters' value can be changed in this file, but once a parameter name was changed, then its 
+;   references in other files should also be changed correspondingly.                     wanghao 2022.04.12
+; ===========================================================================================================
+; --------------------------------------------------------------------------
+; model domain
+[mL = .05] ; half length of model domain 
+[mW = .05]
+[mH = .10]
+; --------------------------------------------------------------------------
+; default cmat rrlinear
+[emod = 1e8]
+[mu   = 1.0]
+; --------------------------------------------------------------------------
+; initial wall box
+[wL = .025] ; half length of wall 
+[wW = .025]
+[wH = .050]
+; --------------------------------------------------------------------------
+; set the default size distribution, using volume fraction
+def granulometry
+    dmin = 2.0e-3 ; dmin - the minimum particle radius, m
+    global sizeTab = table.create('Experimental')
+    table(sizeTab, 2e-3 * 2) = 0.2
+    table(sizeTab, 3e-3 * 2) = 0.3
+    table(sizeTab, 4e-3 * 2) = 0.4
+    table(sizeTab, 5e-3 * 2) = 0.6
+    table(sizeTab, 6e-3 * 2) = 0.8
+    table(sizeTab, 7e-3 * 2) = 0.9
+    table(sizeTab, 8e-3 * 2) = 1.0
+end
+; --------------------------------------------------------------------------
+; sample info
+[bN    = .27 ] ; bN - porosity of the specimen
+[bRes  = 1.0 ] ; bRes - scaling factor of the particles
+[bDen  = 2650] ; bDen - ball density, kN/m3
+[bDamp = .7  ] ; bDamp  - ball damping
+; --------------------------------------------------------------------------
+; servo setting
+[g_f = .3  ] ; gain factor
+[g_u = 100 ] ; gain updates interval
+[g_v = 1e-2] ; maximum velocity
+[g_s = 1e4 ] ; target servo stress
+[g_e = 5e-3] ; servo tolerance
+; ===========================================================================================================
+; EOF: MatGen.p3dat
+; --------------------------------------------------------------------------
+; membrane setting
+[mem_n    = 100  ] ; balls per circle
+[mem_den  = 1600 ] ; membrane density
+[mem_damp = .7   ] ; membrane damping
+[mem_emod = 1e6  ] ; membrane emod
+[mem_mu   = 1.0  ] ; membrane kratio
+[mem_ten  = 1e300] ; membrane bonding tensile strenghth
+[mem_shr  = 1e300] ; membrane bonding shear strenghth
+; --------------------------------------------------------------------------
+; cmat setting
+[linEmod = 1.0e8] ; 1e8
+[linKrat = 1.00 ] ; 1.0
+[fric    = 0.30 ] ; 0.3
+[rrFric  = 0.00 ] ; 0.3
+[dpNrat  = 0.50 ]
+; ===========================================================================================================
+; EOF: MemGen.p3dat
+[log = 0]
+[save_dir = './' ]
+[load_rate = 1e-2]
+[halt_wezz = 10  ]
+; ===========================================================================================================
+; EOF: Params.f3fis

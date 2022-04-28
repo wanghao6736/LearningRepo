@@ -1,0 +1,161 @@
+; =========================================================================================================
+; FILE: membrane.f3fis
+; INFO: Utilities to generate membrane balls for triaxial shear compression test.
+; Author: wanghao | Date: 2022.03.30 | Version: 1.0
+; Revised Version: 1.2 | Date: 2022.04.11
+; =========================================================================================================
+; FUN - gen_hex_cy(n, r, h, base): generate a cylinder wall composites by balls in hexagonal packing.
+; param n: number of balls in one circle
+; param r: radius of the cylinder
+; param h: height of the cylinder
+; param base: position z of the bottom of the cylinder
+; NOTE:
+; * This hexagonal packing is slightly different from the result of 'ball generate hexagonal' command.
+; * The height of final cylinder created by this function is slightly SHORTER than the input value 'h',
+;   because there is an offset in the z direction among the balls above the 1st layer.
+; ---------------------------------------------------------------------------------------------------------
+def gen_hex_cy(n, r, h, base)
+    bmax = ball.maxid
+    r1 = math.pi * r / (n - math.pi) ; radius of balls
+    r += r1
+    local m = int((h - 2*r1) / (math.sqrt(3) * r1)) ; number of balls in z direction (rows)
+    local omega = 2 * math.pi / n ; unit angular increment
+    local inc_p = r1 / r          ; increment in angular direction (anti-clockwise)
+    local inc_z = -(2 - math.sqrt(3)) * r1 ; increment in z direction: from bottom to top
+    pos = vector(0, 0, 0)         ; position vector of membrane ball to be created
+    
+    loop local bid (1, m * n)
+        local i = (bid -1) % n    ; unit angular increment multiplier of phase
+        local phase = omega * i   ; phase of the ball with (id = bid)
+        local nth = (bid - 1) / n ; the nth layer where the ball with (id = bid) sits
+        
+        if nth % 2 == 1 then      ; balls in odd layer have an offset of inc_p in their phase
+            phase += inc_p
+        endif
+        comp.x(pos) = r * math.cos(phase)
+        comp.y(pos) = r * math.sin(phase)
+        comp.z(pos) = 2 * r1 * nth + r1 + nth * inc_z + base ; balls above the 1st layer have an offset of nth*inc_z in z direction
+
+        local bp = ball.create(r1, pos, bid + bmax)
+        ball.group(bp) = "hexa"
+        if i == 0 then
+            ball.group(bp, "pos") = "1st"
+        else if i == n - 1 then
+            ball.group(bp, "pos") = "last"
+        else
+            ball.group(bp, "pos") = "mid"
+        endif
+        if nth % 2 == 1 then
+            ball.group(bp, "row") = "odd"
+        else
+            ball.group(bp, "row") = "even"
+        endif
+        ;io.out(bid)
+    endloop
+end
+; =========================================================================================================
+; FUN - map_neighbors(bp): find a ball's neighbors in clockwise arrangement
+; param bp: target ball
+; NOTE:
+; 1.If id does not exist, ball.find() would throw a value error exception and interrupt the program,
+;   so, balls should be properly chosen if they are to be called by this function
+; 2.For HEXAGONAL packing
+;   *  *  *      tl tp tr         2  3                   2  3
+;   *  bp * <==> lt bp rt <==> 1  bp 4 for odd rows <==> 1  bp 4 for even rows
+;   *  *  *      bl bt br         6  5                   6  5
+; ---------------------------------------------------------------------------------------------------------
+def map_neighbors(bp)
+    local n = mem_n     ; balls per circle
+    local i = ball.id(bp)
+    local bp_lt = 0     ; ball at left of bp
+    local bp_tl = 0     ; ball at top left of bp
+    local bp_tp = i + n ; ball at top of bp
+    local bp_tr = 0     ; ball at top right of bp
+    local bp_rt = 0     ; ball at right of bp
+    local bp_br = 0     ; ball at bottom right of bp
+    local bp_bt = i - n ; ball at bottom of bp
+    local bp_bl = 0     ; ball at bottom left of bp
+    
+    if ball.isgroup(bp, '1st', 'pos') then
+        bp_bl = i - 1
+        bp_lt = i - 1 + n
+        bp_tl = i - 1 + 2*n
+        bp_br = i + 1 - n
+        bp_rt = i + 1
+        bp_tr = i + 1 + n
+    else if ball.isgroup(bp, 'last', 'pos') then
+        bp_bl = i - 1 - n
+        bp_lt = i - 1
+        bp_tl = i - 1 + n
+        bp_br = i + 1 - 2*n
+        bp_rt = i + 1 - n
+        bp_tr = i + 1
+    else if ball.isgroup(bp, 'mid', 'pos') then
+        bp_bl = i - 1 - n
+        bp_lt = i - 1
+        bp_tl = i - 1 + n
+        bp_br = i + 1 - n
+        bp_rt = i + 1
+        bp_tr = i + 1 + n
+    endif
+    
+    if ball.isgroup(bp, 'odd', 'row') then
+        ball.extra(bp, 1) = bp_lt
+        ball.extra(bp, 2) = bp_tp
+        ball.extra(bp, 3) = bp_tr
+        ball.extra(bp, 4) = bp_rt
+        ball.extra(bp, 5) = bp_br
+        ball.extra(bp, 6) = bp_bt
+    else if ball.isgroup(bp, 'even', 'row') then
+        ball.extra(bp, 1) = bp_lt
+        ball.extra(bp, 2) = bp_tl
+        ball.extra(bp, 3) = bp_tp
+        ball.extra(bp, 4) = bp_rt
+        ball.extra(bp, 5) = bp_bt
+        ball.extra(bp, 6) = bp_bl
+    endif
+    ball.extra(bp, 7) = bp_lt
+end
+; =========================================================================================================
+; FUN - set_neighbor: map all balls' neighbors
+; ---------------------------------------------------------------------------------------------------------
+def set_neighbor
+    loop foreach local bp ball.groupmap('hexa')
+        map_neighbors(bp)
+    endloop
+end
+; =========================================================================================================
+; FUN - update_mem_force: callback function to update the force exerted on membrane balls
+; NOTE:
+; * Be sure membrane balls have been grouped into 'top', 'btm' and 'mid' in slot 'mem'
+; ---------------------------------------------------------------------------------------------------------
+def update_mem_force
+    loop foreach local bp ball.groupmap('hexa')
+        if ball.isgroup(bp, 'top', 'mem') then
+            ball.vel.z(bp) = wall.vel.z(wt)
+        else if ball.isgroup(bp, 'btm', 'mem') then
+            ball.vel.z(bp) = wall.vel.z(wb)
+        else if ball.isgroup(bp, 'mid', 'mem') then
+            local area = vector(0, 0, 0)
+            loop local i (1, 6)
+                local bp1 = ball.find(ball.extra(bp, i))
+                local bp2 = ball.find(ball.extra(bp, i + 1))
+                local v1 = ball.pos(bp1) - ball.pos(bp)
+                local v2 = ball.pos(bp2) - ball.pos(bp)
+                area += 0.5 * math.cross(v1, v2) / 3  ; right hand law
+            endloop
+            ball.force.app(bp) = area * g_s
+        endif
+    endloop
+end
+; =========================================================================================================
+; FUN - servo_mem_halt: halt function
+; ---------------------------------------------------------------------------------------------------------
+def servo_mem_halt
+    mAvg = 0.5 * (wall.force.contact.z(wt) - wall.force.contact.z(wb)) / (math.pi * pR * pR)
+    if math.abs(mAvg - g_s) / g_s < g_e then
+        servo_mem_halt = 1
+    endif
+end
+; =========================================================================================================
+; EOF: membrane.f3fis

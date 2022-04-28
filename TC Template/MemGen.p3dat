@@ -1,0 +1,77 @@
+; ===========================================================================================================
+; FILE: MemGen.p3dat
+; INFO: Generate membrane balls and set specimen contact model, then solve model to equilibrium. 
+; STEP: 1.membrane generation
+;       2.contact model specification
+;       3.platens generation
+;       4.servo settings
+; NOTE: All group setting in this file is related to file 'membrane.f3fis', so any change made to the group
+;       setting in this file should also be done to that in the file 'membrane.f3fis'.   wanghao 2022.04.11
+; ===========================================================================================================
+program call 'Membrane.f3fis' suppress
+measure delete
+history delete
+; -----------------------------------------------------------------------------------------------------------
+; membrane generation
+ball   delete range cylinder end-1 0 0 [-wH] end-2 0 0 [wH] radius [wW] not
+clump  delete range cylinder end-1 0 0 [-wH] end-2 0 0 [wH] radius [wW] not
+rblock delete range cylinder end-1 0 0 [-wH] end-2 0 0 [wH] radius [wW] not
+[mem_r = wW ]
+[mem_h = 2.5 * wH]
+[mem_b = -1.2 * wH]
+@gen_hex_cy([mem_n], [mem_r], [mem_h], [mem_b])
+; -----------------------------------------------------------------------------------------------------------
+; contact model specification
+[mem_gap  = .1 * r1]
+ball attribute density [mem_den] damp [mem_damp] range group 'hexa'
+contact cmat default type ball-facet   model rrlinear method deform emod [linEmod] krat [linKrat] property fric [fric]
+contact cmat default type pebble-facet model rrlinear method deform emod [linEmod] krat [linKrat] property fric [fric]
+contact cmat default type rblock-facet model rrlinear method deform emod [linEmod] krat [linKrat] property fric [fric]
+contact cmat add 1 model linearcbond method deform emod [mem_emod] kratio [mem_mu]  ...
+                property 'cb_tenf' [mem_ten] 'cb_shearf' [mem_shr] 'rgap' [mem_gap] ...
+                range group 'hexa' matches 2
+contact cmat add 2 model rrlinear method deform emod [linEmod] krat [linKrat]       ...
+                property lin_force 0 0 0 lin_mode 1 dp_nratio [dpNrat] fric [fric] rr_fric [rrFric] ...
+                range group 'sands' matches 2
+contact cmat apply
+model clean all
+contact method bond gap [mem_gap] range group 'hexa'
+; -----------------------------------------------------------------------------------------------------------
+; platens generation
+[ptop = wall.pos.z(wall.find(2))]
+[pbtm = wall.pos.z(wall.find(1))]
+[pH = .15 * (ptop - pbtm)]
+[pR = wW]
+wall delete ; delete the initial walls
+wall generate name 'top' cylinder base 0 0 [ptop] axis 0 0  1 ...
+                        radius [pR] height [pH] cap true false one-wall
+wall generate name 'btm' cylinder base 0 0 [pbtm] axis 0 0 -1 ...
+                        radius [pR] height [pH] cap true false one-wall
+[wt = wall.find(1)]
+[wb = wall.find(2)]
+; -----------------------------------------------------------------------------------------------------------
+; servo settings
+ball delete range group 'hexa' position-z [pbtm - 7 * r1] [ptop + 7 * r1] not
+ball group 'top' slot 'mem' range group 'hexa' position-z [ptop] [mH  ]
+ball group 'btm' slot 'mem' range group 'hexa' position-z [-mH ] [pbtm]
+ball group 'mid' slot 'mem' range group 'hexa' position-z [pbtm] [ptop]
+ball fix vel spin range union group 'top' slot 'mem' group 'btm' slot 'mem'
+
+wall servo activate on gain-f [g_f] gain-u [g_u] v-m [g_v] force-z [-g_s * pR * pR * math.pi] range name 'top'
+wall servo activate on gain-f [g_f] gain-u [g_u] v-m [g_v] force-z [ g_s * pR * pR * math.pi] range name 'btm'
+
+measure create id 1 radius [pR] position 0 0 0
+measure history id 1 stress-xx id 1
+measure history id 2 stress-yy id 1
+measure history id 3 stress-zz id 1
+[m1 = measure.find(1)]
+
+@set_neighbor
+
+fish callback add @update_mem_force -1 interval 100
+model cycle 1
+model solve fishhalt @servo_mem_halt
+model solve ratio-average 1e-5 cycles 10000
+model save [save_dir + 'mem.sav']
+; ===========================================================================================================
+; EOF: MemGen.p3dat
