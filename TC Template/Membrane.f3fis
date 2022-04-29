@@ -1,5 +1,5 @@
 ; =========================================================================================================
-; FILE: membrane.f3fis
+; FILE: Membrane.f3fis
 ; INFO: Utilities to generate membrane balls for triaxial shear compression test.
 ; Author: wanghao | Date: 2022.03.30 | Version: 1.0
 ; Revised Version: 1.2 | Date: 2022.04.11
@@ -158,4 +158,4 @@ def servo_mem_halt
     endif
 end
 ; =========================================================================================================
-; EOF: membrane.f3fis
+; EOF: Membrane.f3fis

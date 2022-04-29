@@ -5,8 +5,23 @@ NOTE: Contact model settings are defined in file 'Params.f3fis' and file 'MemGen
 AUTHOR: Wanghao
 DATE: 2022.04.28
 """
+import os
+import shutil
 import itasca as it
 it.command("python-reset-state false")
+
+def full_csv_name():
+    for test in os.listdir('./ret/'):
+        for ret in os.listdir('./ret/' + test):
+            if ret == 'result.sav':
+                it.command(f"""
+                model restore './ret/{test}/{ret}'
+                ;plot 'Result' export csv filename [save_dir + test_name + '.csv']
+                """)
+                src = os.path.join('.', 'ret', test, it.fish.get('test_name') + '.csv')
+                dst = os.path.join('.', 'csv', it.fish.get('test_name') + '.csv')
+                shutil.copy(src, dst)
+#full_csv_name()
 
 emods = []
 krats = []
@@ -36,6 +51,6 @@ for emod in emods:
     [save_dir = './ret/' + test_name + '/']
     program call 'Test.p3dat' suppress
     
-    project save 'TriaxialTemplate.prj'
+    project save [global.title + '.prj']
     program return
     """)

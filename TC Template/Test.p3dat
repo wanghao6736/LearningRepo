@@ -36,7 +36,7 @@ def export
             plot 'Geometry' export bitmap filename [save_dir + 'wezz' + string(log) + '.png']
             model save [save_dir + 'wezz' + string(log) + '.sav']
         endcommand
-        log += 0.5
+        log += log_gap
     endif
 end
 

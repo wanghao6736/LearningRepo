@@ -53,11 +53,12 @@
                 "DataFiles" : {
                     "Files" : [ 
                         "MatGen.p3dat" ,
-                        "membrane.f3fis" ,
+                        "Membrane.f3fis" ,
                         "MemGen.p3dat" ,
                         "Test.p3dat" ,
                         "Params.f3fis" ,
-                        "master.p3dat" 
+                        "master.p3dat",
+			            "AnalysisTemplate.py"
                     ]
                 },
                 "OpenFiles" : [ 

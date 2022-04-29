@@ -7,12 +7,13 @@
 ; ===========================================================================================================
 model new
 model random 10001
-model title 'Triaxial Compression Test Template'
+model title 'TriaxialTemplate'
 
 [prefix = 'Ball']
 program system 'mkdir ini'
 program system 'mkdir mem'
 program system 'mkdir ret'
+program system 'mkdir csv'
 
 program call 'Params.f3fis' suppress ; 'Params.f3fis' must be called first
 [ini_name = string.build('%1Prs%2Emod%3Krat%4Pre%5', prefix, bN, emod / 1e6, mu, g_s / 1000)]

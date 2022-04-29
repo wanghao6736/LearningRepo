@@ -1,2 +1,5 @@
-# my-first-project
-my first project
+# Learning Projects
+
+## TC Template
+
+- A TC shear test demo for particle flow code

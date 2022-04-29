@@ -5,8 +5,8 @@
 ;       2.contact model specification
 ;       3.platens generation
 ;       4.servo settings
-; NOTE: All group setting in this file is related to file 'membrane.f3fis', so any change made to the group
-;       setting in this file should also be done to that in the file 'membrane.f3fis'.   wanghao 2022.04.11
+; NOTE: All group setting in this file is related to file 'Membrane.f3fis', so any change made to the group
+;       setting in this file should also be done to that in the file 'Membrane.f3fis'.   wanghao 2022.04.11
 ; ===========================================================================================================
 program call 'Membrane.f3fis' suppress
 measure delete

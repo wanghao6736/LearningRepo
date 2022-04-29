@@ -4,7 +4,7 @@
 ; ===========================================================================================================
 model domain extent [-mL] [mL] [-mW] [mW] [-mH] [mH] condition destroy
 
-contact cmat default model rrlinear method deform emod [emod] kratio [mu]
+contact cmat default model linear method deform emod [emod] kratio [mu]
 
 wall generate name 'Vessel' box [-wL] [wL] [-wW] [wW] [-wH] [wH] expand 1.2
 ; --------------------------------------------------------------------------

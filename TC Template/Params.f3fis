@@ -24,13 +24,13 @@
 def granulometry
     dmin = 2.0e-3 ; dmin - the minimum particle radius, m
     global sizeTab = table.create('Experimental')
-    table(sizeTab, 2e-3 * 2) = 0.2
-    table(sizeTab, 3e-3 * 2) = 0.3
-    table(sizeTab, 4e-3 * 2) = 0.4
-    table(sizeTab, 5e-3 * 2) = 0.6
-    table(sizeTab, 6e-3 * 2) = 0.8
-    table(sizeTab, 7e-3 * 2) = 0.9
-    table(sizeTab, 8e-3 * 2) = 1.0
+    table(sizeTab, 2e-3) = 0.2
+    table(sizeTab, 3e-3) = 0.3
+    table(sizeTab, 4e-3) = 0.4
+    table(sizeTab, 5e-3) = 0.6
+    table(sizeTab, 6e-3) = 0.8
+    table(sizeTab, 7e-3) = 0.9
+    table(sizeTab, 8e-3) = 1.0
 end
 ; --------------------------------------------------------------------------
 ; sample info
@@ -58,15 +58,16 @@ end
 [mem_shr  = 1e300] ; membrane bonding shear strenghth
 ; --------------------------------------------------------------------------
 ; cmat setting
-[linEmod = 1.0e8] ; 1e8
-[linKrat = 1.00 ] ; 1.0
-[fric    = 0.30 ] ; 0.3
-[rrFric  = 0.00 ] ; 0.3
+[linEmod = 1.0e8]
+[linKrat = 1.00 ]
+[fric    = 0.50 ]
+[rrFric  = 0.00 ]
 [dpNrat  = 0.50 ]
 ; ===========================================================================================================
 ; EOF: MemGen.p3dat
-[log = 0]
-[save_dir = './' ]
+[log       = .0  ]
+[log_gap   = .5  ]
+[save_dir  = './']
 [load_rate = 1e-2]
 [halt_wezz = 10  ]
 ; ===========================================================================================================
