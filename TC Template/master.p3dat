@@ -16,13 +16,13 @@ program system 'mkdir ret'
 program system 'mkdir csv'
 
 program call 'Params.f3fis' suppress ; 'Params.f3fis' must be called first
-[ini_name = string.build('%1Prs%2Emod%3Krat%4Pre%5', prefix, bN, emod / 1e6, mu, g_s / 1000)]
+[ini_name = string.build('%1Prs%2Emod%3Krat%4Pre%5', prefix, bNReal, emod / 1e6, mu, g_s / 1000)]
 [save_dir = './ini/' + ini_name + '_'] ; overwrite
 program call 'MatGen.p3dat' suppress
 
 [g_s = 1e5 ] ; overwrite
 [g_e = 1e-2] ; overwrite
-[mem_name = string.build('%1Prs%2Emod%3Krat%4F%5RF%6Conf%7', prefix, bN, linEmod / 1e6, linKrat, fric, rrfric, g_s / 1000)]
+[mem_name = string.build('%1Prs%2Emod%3Krat%4F%5RF%6Conf%7', prefix, bNReal, linEmod / 1e6, linKrat, fric, rrfric, g_s / 1000)]
 [save_dir = './mem/' + mem_name + '_']
 program call 'MemGen.p3dat' suppress
 

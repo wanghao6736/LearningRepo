@@ -71,6 +71,7 @@ model solve fishhalt @servo_wall_halt
 model cycle 1000
 model calm
 
+[bNReal = measure.porosity(m1)]
 wall servo activate false
 model save [save_dir + 'ini.sav']
 ; ===========================================================================================================
