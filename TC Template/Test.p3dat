@@ -54,6 +54,7 @@ fish history @devi
 
 model solve fishhalt @test_halt
 plot 'Result' export csv filename [save_dir + test_name + '.csv']
+plot 'Result' export png filename [save_dir + test_name + '.png']
 model save [save_dir + 'result.sav']
 ; ===========================================================================================================
 ; EOF: Test.p3dat
