@@ -1,1 +1,11 @@
-.sav
+# vscode
+.vscode/
+
+# PFC save files
+*.sav
+
+# C++
+*.exe
+
+# Java
+*.class
