@@ -24,9 +24,9 @@ rblock delete range cylinder end-1 0 0 [-wH] end-2 0 0 [wH] radius [wW] not
 ; contact model specification
 [mem_gap  = .1 * r1]
 ball attribute density [mem_den] damp [mem_damp] range group 'hexa'
-contact cmat default type ball-facet   model rrlinear method deform emod [linEmod] krat [linKrat] property fric [fric]
-contact cmat default type pebble-facet model rrlinear method deform emod [linEmod] krat [linKrat] property fric [fric]
-contact cmat default type rblock-facet model rrlinear method deform emod [linEmod] krat [linKrat] property fric [fric]
+contact cmat default type ball-facet   model linear method deform emod [linEmod] krat [linKrat] property fric [fric]
+contact cmat default type pebble-facet model linear method deform emod [linEmod] krat [linKrat] property fric [fric]
+contact cmat default type rblock-facet model linear method deform emod [linEmod] krat [linKrat] property fric [fric]
 contact cmat add 1 model linearcbond method deform emod [mem_emod] kratio [mem_mu]  ...
                 property 'cb_tenf' [mem_ten] 'cb_shearf' [mem_shr] 'rgap' [mem_gap] ...
                 range group 'hexa' matches 2

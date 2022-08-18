@@ -1,6 +1,6 @@
 ; ===========================================================================================================
 ; FILE: MatGen.p3dat
-; INFO: Generate initial sample in a box                                                wanghao 2022.04.11
+; INFO: Generate initial specimen in a box                                                wanghao 2022.04.11
 ; ===========================================================================================================
 model domain extent [-mL] [mL] [-mW] [mW] [-mH] [mH] condition destroy
 
