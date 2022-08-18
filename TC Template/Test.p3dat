@@ -4,7 +4,7 @@
 ; STEP: 1.save file setting
 ;       2.tests setting                                                                  wanghao 2022.04.11
 ; ===========================================================================================================
-wall servo activate false
+wall   servo activate false
 ball   attribute displacement multiply 0 velocity multiply 0
 clump  attribute displacement multiply 0 velocity multiply 0
 rblock attribute displacement multiply 0 velocity multiply 0
@@ -14,9 +14,20 @@ def wlz
 end
 
 def monitor
-    wezz = (wlz0 - wlz) / wlz0 * 100
-    wszz = 0.5 * (wall.force.contact.z(wt) - wall.force.contact.z(wb)) / (math.pi * pR * pR)
-    devi = wszz - g_s
+    wezz = (wlz0 - wlz) / wlz0 * 100 ; strain in z direction
+    wszz = 0.5 * (wall.force.contact.z(wt) - wall.force.contact.z(wb)) / (math.pi * pR * pR) ; stress in z direction
+    devi = wszz - g_s ; deviatric stress in z direction
+        
+    global msratex = measure.strain.rate(m1, 1, 1) ; strain rate in x direction
+    global msratey = measure.strain.rate(m1, 2, 2) ; strain rate in y direction
+    global mstrainxx = mstrainxx + msratex * global.timestep ; strain in x direction
+    global mstrainyy = mstrainyy + msratey * global.timestep ; strain in x direction
+    
+    werr = math.sqrt(mstrainxx*mstrainxx + mstrainyy*mstrainyy) ; strain in radial direction
+    if wezz > 0 then
+        emod_ym = wszz / wezz  ; Young's Modulus
+        ratio_ps = werr / wezz ; Poisson Ratio
+    endif
 end
 
 def load
@@ -51,10 +62,16 @@ fish callback add @monitor -1
 fish history @wezz
 fish history @wszz
 fish history @devi
+fish history @emod_ym
+fish history @ratio_ps
 
 model solve fishhalt @test_halt
-plot 'Result' export csv filename [save_dir + test_name + '.csv']
-plot 'Result' export png filename [save_dir + test_name + '.png']
+plot 'Result'   export csv filename [save_dir + test_name + '_Ret.csv']
+plot 'Emodulus' export csv filename [save_dir + test_name + '_YE.csv' ]
+plot 'Poisson'  export csv filename [save_dir + test_name + '_PR.csv' ]
+plot 'Result'   export bitmap filename [save_dir + test_name + '_Ret.png']
+plot 'Emodulus' export bitmap filename [save_dir + test_name + '_YE.png' ]
+plot 'Poisson'  export bitmap filename [save_dir + test_name + '_PR.png' ]
 model save [save_dir + 'result.sav']
 ; ===========================================================================================================
 ; EOF: Test.p3dat
