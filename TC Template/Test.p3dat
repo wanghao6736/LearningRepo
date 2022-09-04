@@ -21,7 +21,7 @@ def monitor
     global msratex = measure.strain.rate(m1, 1, 1) ; strain rate in x direction
     global msratey = measure.strain.rate(m1, 2, 2) ; strain rate in y direction
     global mstrainxx = mstrainxx + msratex * global.timestep ; strain in x direction
-    global mstrainyy = mstrainyy + msratey * global.timestep ; strain in x direction
+    global mstrainyy = mstrainyy + msratey * global.timestep ; strain in y direction
     
     werr = math.sqrt(mstrainxx*mstrainxx + mstrainyy*mstrainyy) ; strain in radial direction
     if wezz > 0 then
